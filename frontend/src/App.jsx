@@ -6,25 +6,25 @@ import Panel from "./components/Panel";
 import RotatingType from "./components/RotatingType";
 import TypedMarkdown from "./components/TypedMarkdown";
 import ScoreRing from "./components/ScoreRing";
-import "./App.css";
+import "./Emergent.css";
 
 const PHRASES = [
-  "Ask anything. Eiono researches it.",
-  "Search. Read. Write. Critique.",
-  "From a question to a report in minutes.",
+  "Synthesizing global intelligence.",
+  "Autonomous research at scale.",
+  "From raw data to executive briefing.",
 ];
 
 const EXAMPLES = [
-  "Quantum computing breakthroughs in 2026",
-  "Future of solid-state batteries",
-  "How CRISPR is changing medicine",
+  "Post-quantum cryptography protocols 2026",
+  "Commercial viability of fusion reactors",
+  "AGI governance frameworks",
 ];
 
 const FEATURES = [
-  { i: "🔎", t: "Search" },
-  { i: "🕸️", t: "Read" },
-  { i: "✍️", t: "Write" },
-  { i: "🧐", t: "Critique" },
+  { i: "01", t: "Aggregating" },
+  { i: "02", t: "Parsing" },
+  { i: "03", t: "Synthesizing" },
+  { i: "04", t: "Auditing" },
 ];
 
 const STAGE_TIMINGS = [
@@ -63,6 +63,7 @@ export default function App() {
 
     clearTimers();
     setState({ ...initial, topic, isLoading: true, status: "searching" });
+    
     STAGE_TIMINGS.forEach(({ status, after }) =>
       timers.current.push(setTimeout(() => update({ status }), after))
     );
@@ -89,7 +90,7 @@ export default function App() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `eiono_report_${new Date().toISOString().replace(/[:.]/g, "-")}.md`;
+    a.download = `EIONO_Intelligence_Report_${new Date().toISOString().replace(/[:.]/g, "-")}.md`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -102,10 +103,10 @@ export default function App() {
       const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
       await html2pdf()
         .set({
-          margin: [14, 14, 14, 14],
-          filename: `eiono_report_${stamp}.pdf`,
-          image: { type: "jpeg", quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+          margin: [16, 16, 16, 16],
+          filename: `EIONO_Intelligence_Report_${stamp}.pdf`,
+          image: { type: "jpeg", quality: 1.0 },
+          html2canvas: { scale: 2, useCORS: true, backgroundColor: "#0A0A0A" },
           jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
           pagebreak: { mode: ["css", "legacy"], avoid: ["h1", "h2", "h3", "li"] },
         })
@@ -119,105 +120,125 @@ export default function App() {
   };
 
   return (
-    <>
-      <div className="aurora" aria-hidden="true">
-        <span /><span /><span /><span /><span />
-      </div>
+    <div className="emergent-root">
+      <div className="ambient-grid" aria-hidden="true" />
 
-      <main className="app">
-        <header className="hero">
-          <div className="badge"><i className="live" /> AI Research Agent</div>
-          <h1 className="logo">Eiono</h1>
-          <p className="tagline"><RotatingType phrases={PHRASES} /></p>
-          <div className="chips">
+      <main className="emergent-layout">
+        <header className="emergent-header">
+          <div className="system-status">
+            <span className="status-dot pulsing" /> SYSTEM ONLINE
+          </div>
+          <h1 className="emergent-logo">EIONO</h1>
+          <div className="emergent-tagline">
+            <RotatingType phrases={PHRASES} />
+          </div>
+          <div className="emergent-capabilities">
             {FEATURES.map((f, i) => (
-              <span key={f.t} className="fchip" style={{ animationDelay: `${i * 0.4}s` }}>
-                {f.i} {f.t}
+              <span key={f.t} className="capability-node" style={{ animationDelay: `${i * 0.2}s` }}>
+                <span className="node-id">{f.i}</span> {f.t}
               </span>
             ))}
           </div>
         </header>
 
-        <div className="search-card">
-          <svg className="search-icon" viewBox="0 0 24 24" width="22" height="22" fill="none"
-               stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-            <circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" />
-          </svg>
-          <input
-            type="text"
-            placeholder="What do you want to research?"
-            value={state.topic}
-            onChange={(e) => update({ topic: e.target.value })}
-            onKeyDown={(e) => e.key === "Enter" && handleRun()}
-            disabled={state.isLoading}
-          />
-          <button className="primary" onClick={handleRun}
-                  disabled={state.isLoading || !state.topic.trim()}>
-            {state.isLoading ? <span className="spinner" /> : "Research"}
-          </button>
-        </div>
+        <section className="emergent-command-center">
+          <div className="command-input-wrapper">
+            <span className="command-prompt">~/query $</span>
+            <input
+              type="text"
+              className="command-input"
+              placeholder="Initialize research parameter..."
+              value={state.topic}
+              onChange={(e) => update({ topic: e.target.value })}
+              onKeyDown={(e) => e.key === "Enter" && handleRun()}
+              disabled={state.isLoading}
+              autoFocus
+            />
+            <button 
+              className="emergent-btn primary" 
+              onClick={handleRun}
+              disabled={state.isLoading || !state.topic.trim()}
+            >
+              {state.isLoading ? <span className="loader-bar" /> : "EXECUTE"}
+            </button>
+          </div>
+        </section>
 
         {state.status === "idle" && (
-          <div className="examples">
+          <div className="emergent-suggestions">
+            <span className="suggestions-label">SUGGESTED VECTORS:</span>
             {EXAMPLES.map((ex) => (
-              <button key={ex} className="ex" onClick={() => update({ topic: ex })}>{ex}</button>
+              <button key={ex} className="suggestion-btn" onClick={() => update({ topic: ex })}>
+                {ex}
+              </button>
             ))}
           </div>
         )}
 
-        {state.status !== "idle" && <PipelineStatus status={state.status} />}
-        {state.error && <div className="error">⚠ {state.error}</div>}
+        {state.status !== "idle" && (
+          <div className="emergent-telemetry">
+            <PipelineStatus status={state.status} />
+          </div>
+        )}
+        
+        {state.error && <div className="emergent-alert alert-critical">ERR: {state.error}</div>}
 
         {state.isLoading && (
-          <div className="results">
-            <div className="skeleton tall" />
-            <div className="skeleton" />
+          <div className="emergent-skeleton-grid">
+            <div className="skeleton-block main-block" />
+            <div className="skeleton-block sub-block" />
           </div>
         )}
 
         {state.status === "done" && (
           <>
-            <div className="results">
-              <div className="toolbar">
-                <button className="primary small" onClick={handlePdf} disabled={pdfBusy}>
-                  {pdfBusy ? "Generating..." : "⬇ Download PDF"}
+            <section className="emergent-output-dashboard">
+              <header className="dashboard-actions">
+                <button className="emergent-btn solid" onClick={handlePdf} disabled={pdfBusy}>
+                  {pdfBusy ? "COMPILING..." : "EXPORT PDF"}
                 </button>
-                <button className="ghost small" onClick={handleDownload}>Download .md</button>
-              </div>
+                <button className="emergent-btn outline" onClick={handleDownload}>
+                  EXPORT RAW (.MD)
+                </button>
+              </header>
 
-              <Panel title="Final Report" icon="📄" accent="#7c5cff" defaultOpen>
+              <Panel accent="#FFFFFF" defaultOpen icon="▣" title="INTELLIGENCE REPORT">
                 <TypedMarkdown text={state.report} />
               </Panel>
 
-              <Panel title="Critic Feedback" icon="🧐" accent="#ffb454" defaultOpen>
+              <Panel accent="#A3A3A3" defaultOpen icon="◩" title="SYSTEM AUDIT & CRITIQUE">
                 <ScoreRing text={state.feedback} />
                 <TypedMarkdown text={state.feedback} />
               </Panel>
 
-              <Panel title="Search Results" icon="🔎" accent="#00d4ff">
-                <pre>{state.searchResults}</pre>
+              <Panel accent="#555555" icon="▤" title="RAW SEARCH VECTORS">
+                <pre className="terminal-output">{state.searchResults}</pre>
               </Panel>
 
-              <Panel title="Scraped Source" icon="🕸️" accent="#34d399">
-                <pre>{state.scrapedContent}</pre>
+              <Panel accent="#555555" icon="▦" title="DATA INGESTION LOG">
+                <pre className="terminal-output">{state.scrapedContent}</pre>
               </Panel>
-            </div>
+            </section>
 
-            {/* Hidden PDF source: outside .results so no fade animation touches it */}
             <div className="pdf-offscreen" aria-hidden="true">
-              <div ref={pdfRef} className="pdf-doc">
-                <div className="pdf-brand">Eiono</div>
-                <div className="pdf-meta">
-                  Research report · {state.topic} · {new Date().toLocaleDateString()}
+              <div ref={pdfRef} className="pdf-document-emergent">
+                <div className="pdf-header-emergent">
+                  <span className="pdf-brand">EIONO // INTELLIGENCE</span>
+                  <span className="pdf-timestamp">{new Date().toISOString()}</span>
                 </div>
-                <ReactMarkdown>{state.report}</ReactMarkdown>
+                <h1 className="pdf-title">{state.topic}</h1>
+                <div className="pdf-content">
+                  <ReactMarkdown>{state.report}</ReactMarkdown>
+                </div>
               </div>
             </div>
           </>
         )}
 
-        <footer className="foot">Built with <span className="spark">✦</span> Eiono</footer>
+        <footer className="emergent-footer">
+          EIONO ENGINE v2.0 <span className="separator">|</span> SECURE CONNECTION
+        </footer>
       </main>
-    </>
+    </div>
   );
 }
