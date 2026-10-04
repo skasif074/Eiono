@@ -1,4 +1,5 @@
 import logging
+import os
 import traceback
 
 from fastapi import FastAPI, HTTPException
@@ -11,10 +12,23 @@ logger = logging.getLogger("eiono")
 
 app = FastAPI(title="Eiono API")
 
-# Only needed if the browser calls the API directly (no Vite proxy)
+# ---- CORS: works locally and in production ----
+# Always allowed: local dev + the deployed Vercel site (hardcoded, so it
+# works even if no env variable is set on Render).
+ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://eiono.vercel.app",
+]
+
+# Optional: extra origins (e.g. a custom domain) via a comma-separated env var
+extra = os.getenv("FRONTEND_ORIGINS", "")
+ALLOWED_ORIGINS += [o.strip().rstrip("/") for o in extra.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=ALLOWED_ORIGINS,
+    allow_origin_regex=r"https://.*\.vercel\.app",  # Vercel preview deploys
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -29,6 +43,11 @@ class ResearchResponse(BaseModel):
     scraped_content: str
     report: str
     feedback: str
+
+
+@app.get("/")
+def root():
+    return {"name": "Eiono API", "status": "ok"}
 
 
 @app.get("/health")
