@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { runResearch } from "./api";
 import PipelineStatus from "./components/PipelineStatus";
@@ -47,8 +47,41 @@ const initial = {
 export default function App() {
   const [state, setState] = useState(initial);
   const [pdfBusy, setPdfBusy] = useState(false);
+  const [backendReady, setBackendReady] = useState(false);
+  const [bootMessage, setBootMessage] = useState("ESTABLISHING SECURE UPLINK...");
+  
   const timers = useRef([]);
   const pdfRef = useRef(null);
+
+  // --- COLD START HANDLER ---
+  useEffect(() => {
+    let isMounted = true;
+    
+    const wakeUpBackend = async () => {
+      // Change the message if it takes longer than 5 seconds (typical for Render cold starts)
+      const messageTimer = setTimeout(() => {
+        if (isMounted) setBootMessage("WAKING UP ENGINE. THIS MAY TAKE 50 SECONDS...");
+      }, 5000);
+
+      try {
+        // Ping your backend base URL or a specific /health endpoint.
+        // Render holds this request open until the server boots.
+        // Replace with your actual backend URL from your api.js
+        await fetch(import.meta.env.VITE_BACKEND_URL || "https://eiono.onrender.com/");
+      } catch (e) {
+        console.warn("Backend wake up ping network error (safe to ignore if CORS blocked):", e);
+      } finally {
+        clearTimeout(messageTimer);
+        if (isMounted) setBackendReady(true);
+      }
+    };
+
+    wakeUpBackend();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const update = (patch) => setState((s) => ({ ...s, ...patch }));
 
@@ -119,6 +152,21 @@ export default function App() {
     }
   };
 
+  // --- BOOT SCREEN RENDER ---
+  if (!backendReady) {
+    return (
+      <div className="emergent-root">
+        <div className="ambient-grid" aria-hidden="true" />
+        <div className="startup-screen">
+          <h1 className="startup-logo">EIONO</h1>
+          <div className="loader-bar startup-loader" />
+          <p className="startup-text">{bootMessage}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // --- MAIN APP RENDER ---
   return (
     <div className="emergent-root">
       <div className="ambient-grid" aria-hidden="true" />
