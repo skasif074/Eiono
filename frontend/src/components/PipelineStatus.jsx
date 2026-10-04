@@ -1,31 +1,57 @@
+
 const STEPS = [
-  { key: "searching", label: "Search", icon: "🔎", color: "#00d4ff" },
-  { key: "reading", label: "Read", icon: "🕸️", color: "#7c5cff" },
-  { key: "writing", label: "Write", icon: "✍️", color: "#ff4fd8" },
-  { key: "criticizing", label: "Critique", icon: "🧐", color: "#ffb454" },
+  { id: "searching", label: "Aggregating" },
+  { id: "reading", label: "Parsing" },
+  { id: "writing", label: "Synthesizing" },
+  { id: "criticizing", label: "Auditing" },
 ];
 
 export default function PipelineStatus({ status }) {
-  const activeIndex = STEPS.findIndex((s) => s.key === status);
-  const fill = status === "done" ? 100 : (Math.max(activeIndex, 0) / (STEPS.length - 1)) * 100;
+  const getActiveIndex = () => {
+    if (status === "done") return STEPS.length;
+    const index = STEPS.findIndex((s) => s.id === status);
+    return index === -1 ? 0 : index;
+  };
+
+  const activeIndex = getActiveIndex();
+  
+  // Calculate percentage for the continuous bar
+  const progressPercentage = activeIndex === STEPS.length 
+    ? 100 
+    : (activeIndex / (STEPS.length - 1)) * 100;
 
   return (
-    <div className="pipeline">
-      <div className="track">
-        <div className="track-fill" style={{ width: `${fill}%` }} />
+    <div className="pipeline-container">
+      <div className="pipeline-header">
+        <span className="pipeline-title">Engine Status</span>
+        <span className="pipeline-percentage">
+          {Math.min(Math.round((activeIndex / STEPS.length) * 100), 100)}%
+        </span>
       </div>
-      {STEPS.map((step, i) => {
-        let state = "pending";
-        if (status === "done" || (activeIndex !== -1 && i < activeIndex)) state = "done";
-        else if (i === activeIndex) state = "active";
+      
+      <div className="pipeline-bar-wrapper">
+        <div 
+          className="pipeline-bar-fill" 
+          style={{ width: `${Math.min(progressPercentage, 100)}%` }} 
+        />
+      </div>
 
-        return (
-          <div key={step.key} className={`step ${state}`} style={{ "--c": step.color }}>
-            <span className="dot">{state === "done" ? "✓" : step.icon}</span>
-            <span className="step-label">{step.label}</span>
-          </div>
-        );
-      })}
+      <div className="pipeline-steps-row">
+        {STEPS.map((step, index) => {
+          const isCompleted = index < activeIndex;
+          const isActive = index === activeIndex;
+          
+          let stepClass = "pipeline-step-text";
+          if (isCompleted) stepClass += " completed";
+          if (isActive) stepClass += " active";
+
+          return (
+            <span key={step.id} className={stepClass}>
+              {step.label}
+            </span>
+          );
+        })}
+      </div>
     </div>
   );
 }
