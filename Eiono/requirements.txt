@@ -48,3 +48,6 @@ pydantic>=2.5.0
 html5lib>=1.1
 fastapi>=0.110.0
 uvicorn[standard]>=0.29.0
+
+langchain-groq
+python-dotenv
